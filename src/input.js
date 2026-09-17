@@ -9,20 +9,20 @@ const user32 = koffi.load("user32.dll");
 const BlockInput = user32.func("bool BlockInput(bool fBlockIt)");
 
 /**
- * Bloqueia mouse e teclado por um período usando a API do Windows.
- * @param {number} durationMs Duração do bloqueio em milissegundos.
+ * Blocks mouse and keyboard input for a period using the Windows API.
+ * @param {number} durationMs Block duration in milliseconds.
  * @returns {void}
  */
 function blockMouse(durationMs) {
     const ok = BlockInput(true);
     if (!ok) {
-        console.log("[FREEZE] BlockInput falhou — tente rodar o bot como administrador");
+        console.log("[FREEZE] BlockInput failed — try running the bot as administrator");
         return;
     }
-    console.log(`[FREEZE] Input bloqueado por ${durationMs / 1000}s`);
+    console.log(`[FREEZE] Input blocked for ${durationMs / 1000}s`);
     setTimeout(() => {
         BlockInput(false);
-        console.log("[FREEZE] Input desbloqueado");
+        console.log("[FREEZE] Input unblocked");
     }, durationMs);
 }
 
@@ -31,19 +31,19 @@ async function pressKey(key, description) {
 
     const cooldownMs = settings.cooldownMs ?? 3000;
     if (now - lastActionTime < cooldownMs) {
-        console.log(`[COOLDOWN] Ação bloqueada (${cooldownMs / 1000}s entre ações)`);
+        console.log(`[COOLDOWN] Action blocked (${cooldownMs / 1000}s between actions)`);
         return;
     }
 
     lastActionTime = now;
-    console.log(`[ACAO] ${description} — pressionando ${key.toUpperCase()}`);
+    console.log(`[ACTION] ${description} — pressing ${key.toUpperCase()}`);
 
     try {
         const sender = new Hardware(GAME_WINDOW);
         await sender.keyboard.sendKey(key.toLowerCase());
     } catch (err) {
-        console.error(`[ERRO] Falha ao pressionar ${key.toUpperCase()}:`, err.message);
-        console.error(`Verifique se a janela "${GAME_WINDOW}" está aberta.`);
+        console.error(`[ERROR] Failed to press ${key.toUpperCase()}:`, err.message);
+        console.error(`Check that the "${GAME_WINDOW}" window is open.`);
     }
 }
 

@@ -8,12 +8,12 @@ initSettings();
 const channel = settings.channel;
 
 if (!channel) {
-    console.error('[ERRO] Nenhum canal configurado. Defina "channel" no settings.json.');
+    console.error('[ERROR] No channel configured. Set "channel" in settings.json.');
     process.exit(1);
 }
 
 if (!config.username || !config.token) {
-    console.error("[ERRO] Credenciais ausentes. Defina TWITCH_BOT_USERNAME e TWITCH_BOT_TOKEN.");
+    console.error("[ERROR] Missing credentials. Set TWITCH_BOT_USERNAME and TWITCH_BOT_TOKEN.");
     process.exit(1);
 }
 
@@ -28,16 +28,16 @@ const client = new tmi.Client({
 setupChatHandlers(client);
 
 client.connect().then(() => {
-    console.log(`[BOT] Conectado no canal: ${channel}`);
+    console.log(`[BOT] Connected to channel: ${channel}`);
     console.log("");
     console.log("=".repeat(60));
-    console.log("  !! ATENÇÃO !!");
+    console.log("  !! WARNING !!");
     console.log("");
-    console.log("  ESTE BOT PRECISA SER RODADO COMO ADMINISTRADOR!");
+    console.log("  THIS BOT MUST RUN AS ADMINISTRATOR!");
     console.log("");
-    console.log("  Clique com o botão direito no executável ou terminal");
-    console.log('  e selecione "Executar como administrador".');
+    console.log("  Right-click the executable or terminal");
+    console.log('  and select "Run as administrator".');
     console.log("=".repeat(60));
 }).catch((err) => {
-    console.error("[ERRO] Não foi possível conectar:", err);
+    console.error("[ERROR] Could not connect:", err);
 });

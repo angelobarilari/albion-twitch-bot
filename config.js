@@ -1,5 +1,5 @@
 /**
- * Credenciais do bot. Nunca coloque tokens reais neste arquivo.
+ * Bot credentials. Never store real tokens in this file.
  * @type {{username: string, token: string}}
  */
 module.exports = {
