@@ -1,0 +1,28 @@
+{
+  "name": "albion-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "pkg index.js --target node18-win-x64 --output dist/albion-bot.exe && copy node_modules\\keysender\\build\\Release\\key_sender.node dist\\key_sender.node && copy settings.json dist\\settings.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "pkg": {
+    "assets": [
+      "config.js",
+      "node_modules/keysender/build/Release/key_sender.node"
+    ]
+  },
+  "dependencies": {
+    "keysender": "^2.4.0",
+    "koffi": "^2.16.1",
+    "tmi.js": "^1.8.5",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}
