@@ -24,8 +24,8 @@ npm install
 Set the bot credentials in the terminal environment. Never store the token in source code:
 
 ```powershell
-$env:TWITCH_BOT_USERNAME = "nome_do_bot"
-$env:TWITCH_BOT_TOKEN = "oauth:seu_token"
+$env:TWITCH_BOT_USERNAME = "your_bot_username"
+$env:TWITCH_BOT_TOKEN = "oauth:your_token"
 ```
 
 Edit `settings.json` and set `channel`. To listen for channel points, also fill in `broadcasterToken` with a token that has the `channel:read:redemptions` scope.
