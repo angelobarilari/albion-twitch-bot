@@ -1,84 +1,88 @@
 # Albion Twitch Bot
 
-Bot para conectar um canal da Twitch ao Albion Online. Ele transforma eventos da live em ações no jogo:
+Bot that connects a Twitch channel to Albion Online. It turns live stream events into in-game actions:
 
-- bits específicos pressionam teclas configuradas;
-- resgates de pontos do canal acionam teclas;
-- comandos de teste no chat simulam esses eventos;
-- uma quantidade de bits pode bloquear o mouse por alguns segundos;
-- todas as ações respeitam um cooldown para evitar spam.
+- specific bit amounts press configured keys;
+- channel point redemptions trigger keys;
+- chat test commands simulate these events;
+- a bit amount can block the mouse for a few seconds;
+- every action respects a cooldown to prevent spam.
 
-## Requisitos
+## Requirements
 
-- Windows, porque o envio de teclas usa `keysender` e o bloqueio do mouse usa `user32.dll`;
-- Node.js 18 ou superior;
-- janela do Albion aberta;
-- bot da Twitch criado e autorizado.
+- Windows, because key input uses `keysender` and mouse blocking uses `user32.dll`;
+- Node.js 18 or later;
+- Albion open in a window;
+- a created and authorized Twitch bot.
 
-## Instalação
+## Installation
 
 ```bash
 npm install
 ```
 
-Defina as credenciais do bot no ambiente do terminal. O token não deve ser salvo no código:
+Set the bot credentials in the terminal environment. Never store the token in source code:
 
 ```powershell
 $env:TWITCH_BOT_USERNAME = "nome_do_bot"
 $env:TWITCH_BOT_TOKEN = "oauth:seu_token"
 ```
 
-Edite `settings.json` e informe `channel`. Para ouvir pontos do canal, preencha também `broadcasterToken` com um token que tenha o escopo `channel:read:redemptions`.
+Edit `settings.json` and set `channel`. To listen for channel points, also fill in `broadcasterToken` with a token that has the `channel:read:redemptions` scope.
 
-Inicie o bot como administrador:
+Start the bot as administrator:
 
 ```bash
 npm start
 ```
 
-O privilégio de administrador é necessário para `BlockInput` e pode ser necessário para enviar teclas ao jogo.
+Administrator privileges are required by `BlockInput` and may be required to send keys to the game.
 
-## Configuração
+## Configuration
 
-`settings.json` é a configuração operacional e pode ser alterado sem editar o código. Os campos mais importantes são:
+`settings.json` contains the operational configuration and can be changed without editing source code. The main fields are:
 
-| Campo | Função |
+| Field | Purpose |
 | --- | --- |
-| `channel` | Canal da Twitch que o bot deve acompanhar. |
-| `bitsActions` | Mapeia uma quantidade exata de bits para uma tecla. |
-| `channelPointsActions` | Mapeia o título ou ID de uma recompensa para uma tecla. |
-| `cooldownMs` | Intervalo mínimo entre ações de teclado. |
-| `mouseFreezeActions` | Quantidades de bits que bloqueiam o mouse. |
-| `testCommandsEnabled` | Liga ou desliga os comandos de teste. |
+| `channel` | Twitch channel the bot should monitor. |
+| `bitsActions` | Maps an exact bit amount to a key. |
+| `channelPointsActions` | Maps a reward title or ID to a key. |
+| `cooldownMs` | Minimum interval between keyboard actions. |
+| `mouseFreezeActions` | Bit amounts that block the mouse. |
+| `testCommandsEnabled` | Enables or disables test commands. |
 
-Os comandos de teste existentes são listados no terminal quando a conexão é feita. O comando `pontos Nome da recompensa` simula um resgate pelo título.
+The available test commands are listed in the terminal after connecting. The `points Reward name` command simulates a redemption by title.
 
-## Estrutura
+## Project Structure
 
-- `index.js`: inicialização do processo e conexão do cliente Twitch.
-- `src/settings.js`: leitura e combinação da configuração.
-- `src/defaultSettings.js`: valores padrão usados na primeira execução.
-- `src/handlers/bits.js`: tratamento de bits.
-- `src/handlers/messages.js`: comandos de teste do chat.
-- `src/chatHandler.js`: composição dos handlers e eventos de conexão.
-- `src/pubsub.js`: conexão PubSub e resgates de pontos.
-- `src/input.js`: envio de teclas e bloqueio temporário do mouse.
-- `src/types.js`: contratos JSDoc usados pelo editor.
+- `index.js`: process startup and Twitch client connection.
+- `src/settings.js`: configuration loading and merging.
+- `src/defaultSettings.js`: defaults used on first run.
+- `src/handlers/bits.js`: bit event handling.
+- `src/handlers/messages.js`: chat test commands.
+- `src/chatHandler.js`: handler composition and connection events.
+- `src/pubsub.js`: PubSub connection and channel point redemptions.
+- `src/input.js`: key input and temporary mouse blocking.
+- `src/types.js`: JSDoc contracts used by the editor.
 
-As funções públicas possuem comentários JSDoc com `@param`, `@returns` e tipos reutilizáveis. Isso permite que o serviço de linguagem JavaScript do VS Code forneça sugestões e detecte chamadas incompatíveis.
+Public functions include JSDoc comments with `@param`, `@returns`, and reusable types. This allows the VS Code JavaScript language service to provide suggestions and detect incompatible calls.
 
-## Build do executável
+## Building the Executable
 
 ```bash
 npm run build
 ```
 
-O executável é gerado em `dist/albion-bot.exe`. Antes de distribuir, configure as variáveis de ambiente na máquina que executará o bot e mantenha tokens fora do repositório.
+The executable is generated at `dist/albion-bot.exe`. Before distributing it, configure the environment variables on the target machine and keep tokens outside the repository.
 
-## Segurança
+Build outputs such as `dist/`, `dist.rar`, and `albion-bot.exe` are intentionally excluded from Git. The repository keeps the source code and the reproducible build command; a ready-to-use executable should be published as an asset in a GitHub Release instead of being committed to the source branch.
 
-Se um token real já foi publicado em algum lugar, revogue-o no painel da Twitch e gere outro. O projeto não deve conter credenciais versionadas.
+To create a local build, run `npm run build` on Windows. To distribute one, create a release from a reviewed commit and attach the generated executable or archive without including credentials.
 
-## Licença
+## Security
 
-Este projeto mantém a licença ISC definida no `package.json`.
+If a real token has ever been published, revoke it in the Twitch dashboard and generate a new one. Credentials must never be committed to the repository.
+
+## License
+
+This project uses the ISC license defined in `package.json`.

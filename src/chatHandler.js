@@ -4,8 +4,8 @@ const { setupBitsHandler } = require("./handlers/bits");
 const { setupMessageHandler } = require("./handlers/messages");
 
 /**
- * Registra todos os listeners do bot no cliente da Twitch.
- * @param {{on: Function, connect: Function}} client Cliente tmi.js.
+ * Registers all bot listeners on the Twitch client.
+ * @param {{on: Function, connect: Function}} client tmi.js client.
  * @returns {void}
  */
 function setupChatHandlers(client) {
@@ -21,8 +21,8 @@ function setupChatHandlers(client) {
 
         const token = (settings.broadcasterToken ?? "").trim().replace(/^oauth:/, "");
         if (!token) {
-            console.log("[PUBSUB] broadcasterToken não configurado — pontos do canal desativados.");
-            console.log("[PUBSUB] Peça ao streamer para preencher o campo broadcasterToken no settings.json.");
+            console.log("[PUBSUB] broadcasterToken is not configured — channel points are disabled.");
+            console.log("[PUBSUB] Ask the streamer to fill in broadcasterToken in settings.json.");
             return;
         }
 
@@ -31,49 +31,49 @@ function setupChatHandlers(client) {
     });
 
     client.on("connected", () => {
-        console.log(`[OK] Conectado ao canal #${settings.channel}`);
+        console.log(`[OK] Connected to channel #${settings.channel}`);
         console.log("");
-        console.log("=== AÇÕES DE BITS ===");
+        console.log("=== BIT ACTIONS ===");
         settings.bitsActions.forEach((a) => {
-            console.log(`  ${a.bits} bits → tecla ${a.key} (${a.description})`);
+            console.log(`  ${a.bits} bits → key ${a.key} (${a.description})`);
         });
 
         console.log("");
-        console.log("=== AÇÕES DE PONTOS DO CANAL ===");
+        console.log("=== CHANNEL POINT ACTIONS ===");
         const cpActions = settings.channelPointsActions ?? [];
         if (cpActions.length > 0)
             cpActions.forEach((a) => {
                 const label = a.rewardTitle ?? a.rewardId;
-                console.log(`  "${label}" → tecla ${a.key} (${a.description})`);
+                console.log(`  "${label}" → key ${a.key} (${a.description})`);
             });
-        else console.log("  Nenhuma configurada.");
+        else console.log("  None configured.");
 
         const token = (settings.broadcasterToken ?? "").trim();
         if (!token)
-            console.log("  [AVISO] broadcasterToken vazio — pontos do canal não funcionarão.");
+            console.log("  [WARNING] broadcasterToken is empty — channel points will not work.");
 
         console.log("");
         if (settings.testCommandsEnabled) {
-            console.log("=== COMANDOS DE TESTE ===");
+            console.log("=== TEST COMMANDS ===");
             settings.testCommands.forEach((cmd) => {
-                console.log(`  "${cmd.command}" → tecla ${cmd.key}`);
+                console.log(`  "${cmd.command}" → key ${cmd.key}`);
             });
-            console.log(`  "pontos <nome>" → simula resgate de pontos do canal`);
-            console.log(`  "${settings.mouseFreezeCommand ?? "mousefreeze"}" → simula freeze do mouse por ${(settings.mouseFreezeDurationMs ?? 5000) / 1000}s`);
+            console.log(`  "points <name>" → simulates a channel point redemption`);
+            console.log(`  "${settings.mouseFreezeCommand ?? "mousefreeze"}" → simulates a mouse freeze for ${(settings.mouseFreezeDurationMs ?? 5000) / 1000}s`);
             console.log("");
-            console.log("[AVISO] Modo de teste ATIVADO — desative em settings.json quando não precisar mais.");
-            console.log("[AVISO] Overcharge no Albion o padrão é SHIFT+O, mude para apenas 'O' (ou tecla da sua escolha) ou não irá funcionar.");
+            console.log("[WARNING] Test mode ENABLED — disable it in settings.json when no longer needed.");
+            console.log("[WARNING] Albion's default Overcharge shortcut is SHIFT+O. Change it from 'O' or it will not work.");
         } else {
-            console.log("[INFO] Comandos de teste DESATIVADOS.");
+            console.log("[INFO] Test commands DISABLED.");
         }
 
         console.log("");
-        console.log("[OK] Aguardando bits, pontos do canal e mensagens...");
+        console.log("[OK] Waiting for bits, channel points, and messages...");
     });
 
     client.on("disconnected", (reason) => {
-        console.warn("[DESCONECTADO]", reason);
-        console.log("Reconectando em 5s...");
+        console.warn("[DISCONNECTED]", reason);
+        console.log("Reconnecting in 5s...");
         setTimeout(() => client.connect(), 5000);
     });
 }

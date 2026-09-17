@@ -3,14 +3,14 @@ const { settings } = require("./settings");
 const { pressKey } = require("./input");
 
 /**
- * Procura a ação configurada para uma recompensa e envia sua tecla.
- * @param {string} user Nome de exibição de quem resgatou.
- * @param {string} rewardTitle Título da recompensa na Twitch.
- * @param {string|null} rewardId ID da recompensa, quando disponível.
+ * Finds the configured action for a reward and sends its key.
+ * @param {string} user Display name of the redeemer.
+ * @param {string} rewardTitle Reward title from Twitch.
+ * @param {string|null} rewardId Reward ID, when available.
  * @returns {void}
  */
 function handleChannelPointRedemption(user, rewardTitle, rewardId) {
-    console.log(`\n[PONTOS] ${user} resgatou "${rewardTitle}"`);
+    console.log(`\n[POINTS] ${user} redeemed "${rewardTitle}"`);
 
     const action = (settings.channelPointsActions ?? []).find(
         (a) =>
@@ -21,7 +21,7 @@ function handleChannelPointRedemption(user, rewardTitle, rewardId) {
     if (action) pressKey(action.key, action.description);
     else {
         console.log(
-            `  [INFO] Recompensa não configurada. Adicione em settings.json:`,
+            `  [INFO] Reward not configured. Add it to settings.json:`,
         );
         console.log(
             `  { "rewardTitle": "${rewardTitle}", "key": "Q", "description": "..." }`,
@@ -30,9 +30,9 @@ function handleChannelPointRedemption(user, rewardTitle, rewardId) {
 }
 
 /**
- * Abre a conexão PubSub que recebe resgates de pontos do canal.
- * @param {string} channelId ID numérico do canal na Twitch.
- * @param {string} token Token sem o prefixo oauth:.
+ * Opens the PubSub connection that receives channel point redemptions.
+ * @param {string} channelId Numeric Twitch channel ID.
+ * @param {string} token Token without the oauth: prefix.
  * @returns {void}
  */
 function connectPubSub(channelId, token) {
@@ -73,13 +73,13 @@ function connectPubSub(channelId, token) {
 
         if (msg.type === "RESPONSE") {
             if (msg.error) {
-                console.error(`[PUBSUB] Erro: "${msg.error}"`);
+                console.error(`[PUBSUB] Error: "${msg.error}"`);
                 if (msg.error === "ERR_BADAUTH")
                     console.error(
-                        "[PUBSUB] Token inválido ou sem o escopo channel:read:redemptions.",
+                        "[PUBSUB] Invalid token or missing channel:read:redemptions scope.",
                     );
             } else
-                console.log("[PUBSUB] Inscrito — ouvindo pontos do canal...");
+                console.log("[PUBSUB] Subscribed — listening for channel points...");
 
             return;
         }
@@ -105,12 +105,12 @@ function connectPubSub(channelId, token) {
 
     ws.on("close", () => {
         clearInterval(pingInterval);
-        console.warn("[PUBSUB] Desconectado, reconectando em 5s...");
+        console.warn("[PUBSUB] Disconnected, reconnecting in 5s...");
         setTimeout(() => connectPubSub(channelId, token), 5000);
     });
 
     ws.on("error", (err) => {
-        console.error("[PUBSUB] Erro de conexão:", err.message);
+        console.error("[PUBSUB] Connection error:", err.message);
     });
 }
 

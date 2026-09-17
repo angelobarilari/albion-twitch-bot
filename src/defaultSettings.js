@@ -1,5 +1,5 @@
 /**
- * Valores usados quando settings.json ainda não existe.
+ * Values used when settings.json does not exist yet.
  * @type {import("./types").Settings}
  */
 const defaultSettings = {
@@ -24,20 +24,20 @@ const defaultSettings = {
     ],
     bitsActions: [
         { bits: 1, key: "A", description: "Dismount" },
-        { bits: 2, key: "Q", description: "Habilidade Q" },
-        { bits: 3, key: "W", description: "Habilidade W" },
-        { bits: 4, key: "E", description: "Habilidade E" },
-        { bits: 5, key: "R", description: "Armadura" },
-        { bits: 6, key: "D", description: "Capacete" },
-        { bits: 7, key: "F", description: "Botas" },
-        { bits: 8, key: "1", description: "Poção" },
-        { bits: 9, key: "2", description: "Comida" },
+        { bits: 2, key: "Q", description: "Q Ability" },
+        { bits: 3, key: "W", description: "W Ability" },
+        { bits: 4, key: "E", description: "E Ability" },
+        { bits: 5, key: "R", description: "Armor" },
+        { bits: 6, key: "D", description: "Helmet" },
+        { bits: 7, key: "F", description: "Boots" },
+        { bits: 8, key: "1", description: "Potion" },
+        { bits: 9, key: "2", description: "Food" },
         { bits: 10, key: "O", description: "Overcharge" },
     ],
     channelPointsActions: [
-        { rewardTitle: "Habilidade Q", key: "Q", description: "Habilidade Q" },
-        { rewardTitle: "Habilidade W", key: "W", description: "Habilidade W" },
-        { rewardTitle: "Habilidade E", key: "E", description: "Habilidade E" },
+        { rewardTitle: "Q Ability", key: "Q", description: "Q Ability" },
+        { rewardTitle: "W Ability", key: "W", description: "W Ability" },
+        { rewardTitle: "E Ability", key: "E", description: "E Ability" },
     ],
 };
 
