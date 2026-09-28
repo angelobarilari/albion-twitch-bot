@@ -1,10 +1,16 @@
 {
   "name": "albion-bot",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/app/index.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "pkg index.js --target node18-win-x64 --output dist/albion-bot.exe && copy node_modules\\keysender\\build\\Release\\key_sender.node dist\\key_sender.node && copy settings.json dist\\settings.json"
+    "dev": "tsx index.ts",
+    "start": "node dist/app/index.js",
+    "test": "tsx --test config.test.ts src/settings.test.ts src/chatHandler.test.ts src/handlers/bits.test.ts src/handlers/messages.test.ts src/services/twitch/pubsub.test.ts src/services/input/pressKey.test.ts src/services/input/blockMouse.test.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc && pkg dist/app/index.js --target node18-win-x64 --output dist/albion-bot.exe && copy node_modules\\keysender\\build\\Release\\key_sender.node dist\\key_sender.node && copy settings.json dist\\settings.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -12,7 +18,6 @@
   "description": "",
   "pkg": {
     "assets": [
-      "config.js",
       "node_modules/keysender/build/Release/key_sender.node"
     ]
   },
@@ -23,6 +28,17 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "pkg": "^5.8.1"
+    "@types/node": "^22.13.4",
+    "@types/tmi.js": "^1.8.6",
+    "@types/ws": "^8.18.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "pkg": "^5.8.1",
+    "prettier": "^3.9.9",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs,ts,cts,mts,json,md,yml,yaml}": "prettier --write"
   }
 }

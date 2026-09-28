@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Check and fix formatting
+        shell: bash
+        run: |
+          if ! npm run format:check; then
+            npm run format
+            npm run format:check
+          fi
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
