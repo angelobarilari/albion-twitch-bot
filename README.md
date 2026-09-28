@@ -26,9 +26,16 @@ Set the bot credentials in the terminal environment. Never store the token in so
 ```powershell
 $env:TWITCH_BOT_USERNAME = "your_bot_username"
 $env:TWITCH_BOT_TOKEN = "oauth:your_token"
+$env:TWITCH_BROADCASTER_TOKEN = "your_broadcaster_token"
 ```
 
-Edit `settings.json` and set `channel`. To listen for channel points, also fill in `broadcasterToken` with a token that has the `channel:read:redemptions` scope.
+Edit `settings.json` and set `channel`. `TWITCH_BROADCASTER_TOKEN` is optional and is only needed for channel point redemptions; give it only the `channel:read:redemptions` scope. Tokens must not be stored in `settings.json`.
+
+Compile the application before starting it:
+
+```bash
+npm run build
+```
 
 Start the bot as administrator:
 
@@ -36,36 +43,74 @@ Start the bot as administrator:
 npm start
 ```
 
-Administrator privileges are required by `BlockInput` and may be required to send keys to the game.
+Run with administrator privileges only if Windows `BlockInput` requires it for the configured freeze behavior. Key sending may also depend on the game's privilege level.
 
 ## Configuration
 
+Run `npm run typecheck` to validate TypeScript sources and `npm test` to run the automated tests.
+
 `settings.json` contains the operational configuration and can be changed without editing source code. The main fields are:
 
-| Field | Purpose |
-| --- | --- |
-| `channel` | Twitch channel the bot should monitor. |
-| `bitsActions` | Maps an exact bit amount to a key. |
-| `channelPointsActions` | Maps a reward title or ID to a key. |
-| `cooldownMs` | Minimum interval between keyboard actions. |
-| `mouseFreezeActions` | Bit amounts that block the mouse. |
-| `testCommandsEnabled` | Enables or disables test commands. |
+| Field                    | Purpose                                                                |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `channel`                | Twitch channel the bot should monitor.                                 |
+| `bitsActions`            | Maps an exact bit amount to a key.                                     |
+| `channelPointsActions`   | Maps a reward title or ID to a key.                                    |
+| `cooldownMs`             | Minimum interval between keyboard actions.                             |
+| `mouseFreezeActions`     | Bit amounts that block the mouse.                                      |
+| `mouseFreezeCooldownMs`  | Minimum interval between input-freeze requests.                        |
+| `testCommandsEnabled`    | Enables moderator/broadcaster-only test commands; disabled by default. |
+| `testMouseFreezeCommand` | Chat command for a test freeze.                                        |
 
-The available test commands are listed in the terminal after connecting. The `points Reward name` command simulates a redemption by title.
+Test commands are disabled by default. When enabled, only moderators and the broadcaster can invoke configured commands, the freeze command, or `points <reward name>`.
 
 ## Project Structure
 
-- `index.js`: process startup and Twitch client connection.
-- `src/settings.js`: configuration loading and merging.
-- `src/defaultSettings.js`: defaults used on first run.
-- `src/handlers/bits.js`: bit event handling.
-- `src/handlers/messages.js`: chat test commands.
-- `src/chatHandler.js`: handler composition and connection events.
-- `src/pubsub.js`: PubSub connection and channel point redemptions.
-- `src/input.js`: key input and temporary mouse blocking.
-- `src/types.js`: JSDoc contracts used by the editor.
+- `index.ts`: process startup and Twitch client connection.
+- `config.ts`: Twitch credentials read from environment variables.
+- `src/types/actions.ts`: action configuration contracts.
+- `src/types/settings.ts`: application settings contract.
+- `src/types/handlers.ts`: dependency contracts for event handlers.
+- `src/settings.ts`: configuration loading and merging.
+- `src/defaultSettings.ts`: defaults used on first run.
+- `src/handlers/bits.ts`: bit event handling.
+- `src/handlers/messages.ts`: chat test commands.
+- `src/chatHandler.ts`: handler composition and connection events.
+- `src/services/twitch/pubsub.ts`: PubSub connection and channel point redemptions.
+- `src/services/input/blockMouse.ts`: Windows input blocking.
+- `src/services/input/pressKey.ts`: key presses and cooldown handling.
 
-Public functions include JSDoc comments with `@param`, `@returns`, and reusable types. This allows the VS Code JavaScript language service to provide suggestions and detect incompatible calls.
+Runtime modules are written in TypeScript and compiled to CommonJS under `dist/app` before packaging.
+
+## Tests
+
+Run the automated tests with:
+
+```bash
+npm test
+```
+
+The suite covers configuration, settings validation, PubSub, key presses, mouse blocking, chat connection handlers, bit events, and chat commands. Tests use injected fakes for environment variables, the settings file system, Twitch clients, WebSockets, timers, key sending, and Windows input blocking. They do not connect to Twitch, call Windows APIs, send real keyboard or mouse input, or require Albion to be running. GitHub Actions runs this suite on Windows.
+
+These are isolated tests, not end-to-end checks of Twitch connectivity, `tmi.js` reconnection behavior, or interaction with Albion and Windows input APIs.
+
+## Known Limitations and Risks
+
+- IRC reconnection is handled by `tmi.js`; the bot does not schedule a second manual reconnect. Live reconnect behavior still requires validation with Twitch.
+- Test commands are disabled by default and require a moderator or broadcaster role when enabled.
+- Mouse-freeze requests have their own cooldown; an accepted later request extends the block, and stale timers cannot release it early.
+- `settings.json` values are validated at load time. Invalid files fall back to defaults, and overlapping bit mappings keep the key action while disabling the conflicting freeze.
+- Broadcaster tokens belong in `TWITCH_BROADCASTER_TOKEN`, not in `settings.json`. If a real token was previously stored or committed, remove it and revoke/rotate it.
+
+## Formatting and Git Hooks
+
+Run Prettier across the project with:
+
+```bash
+npm run format
+```
+
+`npm install` enables the Husky pre-commit hook. Before each commit, lint-staged formats supported staged files. GitHub Actions runs `npm run format:check` on pushes and pull requests.
 
 ## Building the Executable
 
