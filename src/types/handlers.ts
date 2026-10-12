@@ -11,6 +11,7 @@ export type BitsHandlerActions = InputActions & {
 
 export type MessageHandlerActions = InputActions & {
   settings: Settings;
+  simulateBits: (bits: number, user: string) => void;
   handleChannelPointRedemption: (
     user: string,
     rewardTitle: string,

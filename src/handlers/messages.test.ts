@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type tmi from "tmi.js";
+import { handleBitsAmount } from "./bits.js";
 import { setupMessageHandler } from "./messages.js";
 import type { Settings } from "../types/settings.js";
 
@@ -43,6 +44,18 @@ function createHarness(settingsOverride: Partial<Settings> = {}) {
     settings,
     pressKey: (key, description) => actions.push({ type: "pressKey", args: [key, description] }),
     blockMouse: (durationMs) => actions.push({ type: "blockMouse", args: [durationMs] }),
+    simulateBits: (bits, user) =>
+      handleBitsAmount(
+        bits,
+        user,
+        {
+          settings,
+          pressKey: (key, description) =>
+            actions.push({ type: "pressKey", args: [key, description] }),
+          blockMouse: (durationMs) => actions.push({ type: "blockMouse", args: [durationMs] }),
+        },
+        true,
+      ),
     handleChannelPointRedemption: (user, rewardTitle, rewardId) =>
       actions.push({ type: "redemption", args: [user, rewardTitle, rewardId] }),
   });
@@ -85,10 +98,38 @@ test("freeze and points commands call their configured action adapters", () => {
   ]);
 });
 
+test("bits command reuses configured bit actions in dry run", () => {
+  const harness = createHarness({
+    dryRun: true,
+    mouseFreezeActions: [{ bits: 42 }],
+    bitsActions: [{ bits: 42, key: "Q", description: "Q Ability" }],
+  });
+
+  harness.emitMessage("BITS 42");
+
+  assert.deepEqual(harness.actions, [
+    { type: "blockMouse", args: [5000] },
+    { type: "pressKey", args: ["Q", "Q Ability"] },
+  ]);
+});
+
+test("bits command requires dry run and a positive safe integer", () => {
+  const harness = createHarness({
+    bitsActions: [{ bits: 42, key: "Q" }],
+  });
+
+  harness.emitMessage("bits 42");
+  harness.emitMessage("bits 0");
+  harness.emitMessage("bits 9007199254740992");
+
+  assert.deepEqual(harness.actions, []);
+});
+
 test("disabled test commands and messages from the bot do not trigger actions", () => {
   const harness = createHarness({ testCommandsEnabled: false });
 
   harness.emitMessage("press q");
+  harness.emitMessage("bits 42");
   harness.emitMessage("mousefreeze", true);
 
   assert.deepEqual(harness.actions, []);
@@ -99,6 +140,7 @@ test("test commands ignore viewers who are not moderators or broadcaster", () =>
 
   harness.emitMessage("press q", false, "viewer", false);
   harness.emitMessage("points Q Ability", false, "viewer", false);
+  harness.emitMessage("bits 42", false, "viewer", false);
   harness.emitMessage("mousefreeze", false, "viewer", false);
 
   assert.deepEqual(harness.actions, []);

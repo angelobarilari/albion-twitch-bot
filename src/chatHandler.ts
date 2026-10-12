@@ -1,7 +1,7 @@
 import type tmi from "tmi.js";
 import { connectPubSub, handleChannelPointRedemption } from "./services/twitch/pubsub.js";
 import { blockMouse, pressKey } from "./services/input/index.js";
-import { setupBitsHandler } from "./handlers/bits.js";
+import { handleBitsAmount, setupBitsHandler } from "./handlers/bits.js";
 import { setupMessageHandler } from "./handlers/messages.js";
 import config = require("../config.js");
 import settingsModule = require("./settings.js");
@@ -17,8 +17,15 @@ const { settings } = settingsModule;
 export function setupChatHandlers(client: tmi.Client): void {
   let pubSubConnected = false;
 
-  setupBitsHandler(client, { settings, pressKey, blockMouse });
-  setupMessageHandler(client, { settings, pressKey, blockMouse, handleChannelPointRedemption });
+  const bitsActions = { settings, pressKey, blockMouse };
+  setupBitsHandler(client, bitsActions);
+  setupMessageHandler(client, {
+    settings,
+    pressKey,
+    blockMouse,
+    simulateBits: (bits, user) => handleBitsAmount(bits, user, bitsActions, true),
+    handleChannelPointRedemption,
+  });
 
   client.on("roomstate", (_channel, tags) => {
     if (pubSubConnected) return;
@@ -67,6 +74,7 @@ export function setupChatHandlers(client: tmi.Client): void {
       settings.testCommands.forEach((command) => {
         console.log(`  "${command.command}" → key ${command.key}`);
       });
+      console.log('  "bits <amount>" → simulates a bits event (requires dryRun)');
       console.log('  "points <name>" → simulates a channel point redemption');
       console.log(
         `  "${settings.testMouseFreezeCommand}" → simulates a mouse freeze for ${settings.mouseFreezeDurationMs / 1000}s`,

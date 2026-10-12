@@ -63,7 +63,7 @@ Run `npm run typecheck` to validate TypeScript sources and `npm test` to run the
 | `testCommandsEnabled`    | Enables moderator/broadcaster-only test commands; disabled by default.            |
 | `testMouseFreezeCommand` | Chat command for a test freeze.                                                   |
 
-Test commands are disabled by default. When enabled, only moderators and the broadcaster can invoke configured commands, the freeze command, or `points <reward name>`.
+Test commands are disabled by default. When enabled, only moderators and the broadcaster can invoke configured commands, the freeze command, `points <reward name>`, or `bits <amount>`. Simulated bits require `dryRun: true` so they cannot send input to Albion.
 
 ## Project Structure
 
