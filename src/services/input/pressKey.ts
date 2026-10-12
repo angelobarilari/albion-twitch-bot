@@ -7,6 +7,7 @@ const GAME_WINDOW = "Albion";
 type PressKeyAdapters = {
   now?: () => number;
   cooldownMs?: () => number;
+  dryRun?: () => boolean;
   sendKey?: (key: string) => Promise<void>;
 };
 
@@ -21,6 +22,7 @@ export function createPressKey(adapters: PressKeyAdapters = {}) {
   let lastActionTime = 0;
   const now = adapters.now ?? Date.now;
   const cooldownMs = adapters.cooldownMs ?? (() => settings.cooldownMs ?? 3000);
+  const dryRun = adapters.dryRun ?? (() => settings.dryRun);
   const sendKey =
     adapters.sendKey ??
     (async (key: string) => {
@@ -38,6 +40,11 @@ export function createPressKey(adapters: PressKeyAdapters = {}) {
     }
 
     lastActionTime = currentTime;
+    if (dryRun()) {
+      console.log(`[DRY RUN] ${description ?? "Key action"} — would press ${key.toUpperCase()}`);
+      return;
+    }
+
     console.log(`[ACTION] ${description} — pressing ${key.toUpperCase()}`);
 
     try {

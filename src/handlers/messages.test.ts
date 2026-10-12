@@ -15,6 +15,7 @@ const defaultSettings: Settings = {
   mouseFreezeDurationMs: 5000,
   mouseFreezeCooldownMs: 30_000,
   mouseFreezeActions: [],
+  dryRun: false,
   testCommandsEnabled: true,
   testMouseFreezeCommand: "mousefreeze",
   testCommands: [{ command: "press q", key: "Q" }],

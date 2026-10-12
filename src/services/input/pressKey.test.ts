@@ -40,3 +40,17 @@ test("a failed key attempt still starts the cooldown", async () => {
 
   assert.equal(attempts, 1);
 });
+
+test("dry run logs the key action without sending it", async () => {
+  const sentKeys: string[] = [];
+  const pressKey = createPressKey({
+    dryRun: () => true,
+    sendKey: async (key) => {
+      sentKeys.push(key);
+    },
+  });
+
+  await pressKey("Q", "Q skill");
+
+  assert.deepEqual(sentKeys, []);
+});

@@ -6,6 +6,7 @@ const defaultSettings: Settings = {
   mouseFreezeDurationMs: 5000,
   mouseFreezeCooldownMs: 30_000,
   mouseFreezeActions: [{ bits: 100 }],
+  dryRun: false,
   testCommandsEnabled: false,
   testMouseFreezeCommand: "mousefreeze",
   testCommands: [

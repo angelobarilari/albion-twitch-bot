@@ -7,6 +7,7 @@ type BlockMouseAdapters = {
   blockInput: (blocked: boolean) => boolean;
   now?: () => number;
   cooldownMs?: () => number;
+  dryRun?: () => boolean;
   setTimeout?: (callback: () => void, delayMs: number) => unknown;
   clearTimeout?: (handle: unknown) => void;
 };
@@ -23,6 +24,7 @@ export function createBlockMouse(adapters: BlockMouseAdapters) {
     adapters.clearTimeout ?? ((handle) => clearTimeout(handle as ReturnType<typeof setTimeout>));
   const now = adapters.now ?? Date.now;
   const cooldownMs = adapters.cooldownMs ?? (() => settings.mouseFreezeCooldownMs);
+  const dryRun = adapters.dryRun ?? (() => settings.dryRun);
   let unblockTimer: unknown;
   let blockGeneration = 0;
   let lastBlockTime = Number.NEGATIVE_INFINITY;
@@ -31,6 +33,12 @@ export function createBlockMouse(adapters: BlockMouseAdapters) {
     const currentTime = now();
     if (currentTime - lastBlockTime < cooldownMs()) {
       console.log("[COOLDOWN] Input freeze request ignored.");
+      return;
+    }
+
+    if (dryRun()) {
+      lastBlockTime = currentTime;
+      console.log(`[DRY RUN] Would block input for ${durationMs / 1000}s`);
       return;
     }
 
