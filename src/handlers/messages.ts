@@ -9,7 +9,7 @@ import type { MessageHandlerActions } from "../types/handlers.js";
  * @returns Nothing.
  */
 export function setupMessageHandler(client: tmi.Client, actions: MessageHandlerActions): void {
-  const { settings, pressKey, blockMouse, handleChannelPointRedemption } = actions;
+  const { settings, pressKey, blockMouse, simulateBits, handleChannelPointRedemption } = actions;
 
   client.on("message", (_channel, tags, message, self) => {
     if (self) return;
@@ -35,6 +35,19 @@ export function setupMessageHandler(client: tmi.Client, actions: MessageHandlerA
       if (rewardTitle) {
         console.log(`[TEST] Simulating channel point redemption: "${rewardTitle}"`);
         handleChannelPointRedemption(user, rewardTitle, null);
+      }
+      return;
+    }
+
+    const bitsMatch = normalized.match(/^bits\s+(\d+)$/);
+    if (bitsMatch) {
+      const bits = Number.parseInt(bitsMatch[1], 10);
+      if (!Number.isSafeInteger(bits) || bits <= 0) {
+        console.log("[TEST] Bits amount must be a positive safe integer.");
+      } else if (!settings.dryRun) {
+        console.log("[TEST] Simulated bits require dryRun to be enabled in settings.json.");
+      } else {
+        simulateBits(bits, user);
       }
       return;
     }
