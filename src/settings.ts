@@ -70,6 +70,7 @@ function parseSettings(value: unknown): Partial<Settings> | null {
     (typeof value.mouseFreezeActions === "undefined" ||
       (Array.isArray(value.mouseFreezeActions) &&
         value.mouseFreezeActions.every(isMouseFreezeAction))) &&
+    (typeof value.dryRun === "undefined" || typeof value.dryRun === "boolean") &&
     (typeof value.testCommandsEnabled === "undefined" ||
       typeof value.testCommandsEnabled === "boolean") &&
     (typeof value.testMouseFreezeCommand === "undefined" ||

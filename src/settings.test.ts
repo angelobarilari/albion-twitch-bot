@@ -24,7 +24,9 @@ function createFileSystem(initialContent?: string) {
 const silentLogger = { error() {}, log() {} };
 
 test("settings merge persisted values over defaults", () => {
-  const fileSystem = createFileSystem(JSON.stringify({ channel: "my_channel", cooldownMs: 900 }));
+  const fileSystem = createFileSystem(
+    JSON.stringify({ channel: "my_channel", cooldownMs: 900, dryRun: true }),
+  );
   const store = settingsModule.createSettingsStore(
     "memory-settings.json",
     fileSystem,
@@ -36,6 +38,7 @@ test("settings merge persisted values over defaults", () => {
   assert.equal(settings.cooldownMs, 900);
   assert.equal(settings.mouseFreezeDurationMs, 5000);
   assert.equal(settings.mouseFreezeCooldownMs, 30_000);
+  assert.equal(settings.dryRun, true);
   assert.equal(settings.testCommandsEnabled, false);
   assert.deepEqual(fileSystem.writes, []);
 });
@@ -52,6 +55,7 @@ test("settings create a defaults file when no file exists", () => {
   assert.equal(fileSystem.writes.length, 1);
   assert.deepEqual(JSON.parse(fileSystem.writes[0]), settings);
   assert.equal(settings.channel, "");
+  assert.equal(settings.dryRun, false);
 });
 
 test("invalid settings fall back to defaults without overwriting the existing file", () => {
@@ -70,7 +74,7 @@ test("invalid settings fall back to defaults without overwriting the existing fi
 
 test("structurally invalid settings fall back to defaults", () => {
   const fileSystem = createFileSystem(
-    JSON.stringify({ bitsActions: { unexpected: true }, testCommands: null }),
+    JSON.stringify({ bitsActions: { unexpected: true }, testCommands: null, dryRun: "yes" }),
   );
   const store = settingsModule.createSettingsStore(
     "memory-settings.json",
@@ -80,6 +84,7 @@ test("structurally invalid settings fall back to defaults", () => {
   const settings = store.initSettings();
 
   assert.equal(settings.testCommandsEnabled, false);
+  assert.equal(settings.dryRun, false);
   assert.ok(Array.isArray(settings.bitsActions));
   assert.deepEqual(fileSystem.writes, []);
 });

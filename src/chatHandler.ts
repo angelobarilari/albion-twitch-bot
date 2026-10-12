@@ -38,6 +38,7 @@ export function setupChatHandlers(client: tmi.Client): void {
 
   client.on("connected", (_address, port) => {
     console.log(`[OK] Connected to channel #${settings.channel} on port ${port}`);
+    console.log(`[INFO] Dry run ${settings.dryRun ? "ENABLED" : "disabled"}.`);
     console.log("");
     console.log("=== BIT ACTIONS ===");
     settings.bitsActions.forEach((action) => {

@@ -5,6 +5,7 @@
   "mouseFreezeDurationMs": 5000,
   "mouseFreezeCooldownMs": 30000,
   "mouseFreezeActions": [{ "bits": 100 }],
+  "dryRun": false,
   "testCommandsEnabled": false,
   "testMouseFreezeCommand": "mousefreeze",
   "testCommands": [

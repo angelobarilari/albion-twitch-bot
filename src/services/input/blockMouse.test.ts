@@ -73,3 +73,44 @@ test("a failed input block does not schedule an unblock", () => {
 
   assert.equal(scheduledCount, 0);
 });
+
+test("a failed input block does not start the cooldown", () => {
+  let currentTime = 0;
+  let attempts = 0;
+  const blockMouse = createBlockMouse({
+    blockInput: () => {
+      attempts += 1;
+      return attempts > 1;
+    },
+    now: () => currentTime,
+    cooldownMs: () => 30_000,
+    setTimeout: () => 1,
+  });
+
+  blockMouse(1000);
+  currentTime = 1000;
+  blockMouse(1000);
+
+  assert.equal(attempts, 2);
+});
+
+test("dry run does not block input or schedule an unblock", () => {
+  let nativeCalls = 0;
+  let scheduledCount = 0;
+  const blockMouse = createBlockMouse({
+    blockInput: () => {
+      nativeCalls += 1;
+      return true;
+    },
+    dryRun: () => true,
+    setTimeout: () => {
+      scheduledCount += 1;
+      return scheduledCount;
+    },
+  });
+
+  blockMouse(5000);
+
+  assert.equal(nativeCalls, 0);
+  assert.equal(scheduledCount, 0);
+});

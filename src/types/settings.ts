@@ -6,6 +6,7 @@ export type Settings = {
   mouseFreezeDurationMs: number;
   mouseFreezeCooldownMs: number;
   mouseFreezeActions: MouseFreezeAction[];
+  dryRun: boolean;
   testCommandsEnabled: boolean;
   testMouseFreezeCommand: string;
   testCommands: TestCommand[];

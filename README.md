@@ -51,16 +51,17 @@ Run `npm run typecheck` to validate TypeScript sources and `npm test` to run the
 
 `settings.json` contains the operational configuration and can be changed without editing source code. The main fields are:
 
-| Field                    | Purpose                                                                |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `channel`                | Twitch channel the bot should monitor.                                 |
-| `bitsActions`            | Maps an exact bit amount to a key.                                     |
-| `channelPointsActions`   | Maps a reward title or ID to a key.                                    |
-| `cooldownMs`             | Minimum interval between keyboard actions.                             |
-| `mouseFreezeActions`     | Bit amounts that block the mouse.                                      |
-| `mouseFreezeCooldownMs`  | Minimum interval between input-freeze requests.                        |
-| `testCommandsEnabled`    | Enables moderator/broadcaster-only test commands; disabled by default. |
-| `testMouseFreezeCommand` | Chat command for a test freeze.                                        |
+| Field                    | Purpose                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `channel`                | Twitch channel the bot should monitor.                                            |
+| `bitsActions`            | Maps an exact bit amount to a key.                                                |
+| `channelPointsActions`   | Maps a reward title or ID to a key.                                               |
+| `cooldownMs`             | Minimum interval between keyboard actions.                                        |
+| `mouseFreezeActions`     | Bit amounts that block the mouse.                                                 |
+| `mouseFreezeCooldownMs`  | Minimum interval between input-freeze requests.                                   |
+| `dryRun`                 | Logs intended actions without sending keys or blocking input; `false` by default. |
+| `testCommandsEnabled`    | Enables moderator/broadcaster-only test commands; disabled by default.            |
+| `testMouseFreezeCommand` | Chat command for a test freeze.                                                   |
 
 Test commands are disabled by default. When enabled, only moderators and the broadcaster can invoke configured commands, the freeze command, or `points <reward name>`.
 
