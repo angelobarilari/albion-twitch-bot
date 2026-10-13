@@ -1,5 +1,7 @@
 import WebSocket from "ws";
 import { pressKey } from "../input/pressKey.js";
+import type { ActionContext } from "../../types/actions.js";
+import { formatActionContext } from "../../utils/actionContext.js";
 import settingsModule = require("../../settings.js");
 import type { Settings } from "../../types/settings.js";
 
@@ -51,17 +53,30 @@ export function handleChannelPointRedemption(
   rewardTitle: string,
   rewardId: string | null,
   dependencies: Pick<PubSubDependencies, "settings" | "pressKey"> = {},
+  context?: ActionContext,
 ): void {
-  console.log(`\n[POINTS] ${user} redeemed "${rewardTitle}"`);
+  const actionContext = context ?? {
+    source: "channel-points" as const,
+    event: rewardTitle,
+    user,
+  };
+  console.log(
+    `\n[POINTS] Redeemed ${JSON.stringify(rewardTitle)}${formatActionContext(actionContext)}`,
+  );
 
   const action = (dependencies.settings ?? settings).channelPointsActions.find(
     (item) =>
       item.rewardId === rewardId || item.rewardTitle?.toLowerCase() === rewardTitle.toLowerCase(),
   );
 
-  if (action) (dependencies.pressKey ?? pressKey)(action.key, action.description);
-  else {
-    console.log("  [INFO] Reward not configured. Add it to settings.json:");
+  if (action) {
+    console.log(
+      `[MAPPING] Reward ${JSON.stringify(rewardTitle)} -> key ${action.key}${formatActionContext(actionContext)}`,
+    );
+    (dependencies.pressKey ?? pressKey)(action.key, action.description, actionContext);
+  } else {
+    console.log(`  [UNMAPPED] Reward not configured${formatActionContext(actionContext)}.`);
+    console.log("  [INFO] Add this mapping to settings.json:");
     console.log(`  { "rewardTitle": "${rewardTitle}", "key": "Q", "description": "..." }`);
   }
 }

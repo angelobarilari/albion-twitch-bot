@@ -95,6 +95,10 @@ The suite covers configuration, settings validation, PubSub, key presses, mouse 
 
 These are isolated tests, not end-to-end checks of Twitch connectivity, `tmi.js` reconnection behavior, or interaction with Albion and Windows input APIs.
 
+## Event Logs
+
+Action logs include the event source, event, user, configured mapping, and whether the action was executed, simulated, or blocked by a cooldown. Chat message contents and credentials are not logged.
+
 ## Known Limitations and Risks
 
 - IRC reconnection is handled by `tmi.js`; the bot does not schedule a second manual reconnect. Live reconnect behavior still requires validation with Twitch.

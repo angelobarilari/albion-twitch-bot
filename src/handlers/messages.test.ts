@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type tmi from "tmi.js";
+import type { ActionContext } from "../types/actions.js";
 import { handleBitsAmount } from "./bits.js";
 import { setupMessageHandler } from "./messages.js";
 import type { Settings } from "../types/settings.js";
 
 type ActionCall =
-  | { type: "pressKey"; args: [string, string | undefined] }
-  | { type: "blockMouse"; args: [number] }
-  | { type: "redemption"; args: [string, string, string | null] };
+  | { type: "pressKey"; args: [string, string | undefined, ActionContext | undefined] }
+  | { type: "blockMouse"; args: [number, ActionContext | undefined] }
+  | { type: "redemption"; args: [string, string, string | null, ActionContext | undefined] };
 
 const defaultSettings: Settings = {
   channel: "channel",
@@ -42,22 +43,25 @@ function createHarness(settingsOverride: Partial<Settings> = {}) {
 
   setupMessageHandler(client, {
     settings,
-    pressKey: (key, description) => actions.push({ type: "pressKey", args: [key, description] }),
-    blockMouse: (durationMs) => actions.push({ type: "blockMouse", args: [durationMs] }),
+    pressKey: (key, description, context) =>
+      actions.push({ type: "pressKey", args: [key, description, context] }),
+    blockMouse: (durationMs, context) =>
+      actions.push({ type: "blockMouse", args: [durationMs, context] }),
     simulateBits: (bits, user) =>
       handleBitsAmount(
         bits,
         user,
         {
           settings,
-          pressKey: (key, description) =>
-            actions.push({ type: "pressKey", args: [key, description] }),
-          blockMouse: (durationMs) => actions.push({ type: "blockMouse", args: [durationMs] }),
+          pressKey: (key, description, context) =>
+            actions.push({ type: "pressKey", args: [key, description, context] }),
+          blockMouse: (durationMs, context) =>
+            actions.push({ type: "blockMouse", args: [durationMs, context] }),
         },
         true,
       ),
-    handleChannelPointRedemption: (user, rewardTitle, rewardId) =>
-      actions.push({ type: "redemption", args: [user, rewardTitle, rewardId] }),
+    handleChannelPointRedemption: (user, rewardTitle, rewardId, context) =>
+      actions.push({ type: "redemption", args: [user, rewardTitle, rewardId, context] }),
   });
 
   return {
@@ -82,7 +86,14 @@ test("configured chat command presses its mapped key", () => {
   harness.emitMessage("PRESS Q");
 
   assert.deepEqual(harness.actions, [
-    { type: "pressKey", args: ["Q", 'Command "press q" from alice → Q'] },
+    {
+      type: "pressKey",
+      args: [
+        "Q",
+        'Command "press q" from alice → Q',
+        { source: "test-command", event: "press q", user: "alice" },
+      ],
+    },
   ]);
 });
 
@@ -93,8 +104,19 @@ test("freeze and points commands call their configured action adapters", () => {
   harness.emitMessage("points Q Ability");
 
   assert.deepEqual(harness.actions, [
-    { type: "blockMouse", args: [5000] },
-    { type: "redemption", args: ["alice", "Q Ability", null] },
+    {
+      type: "blockMouse",
+      args: [5000, { source: "test-command", event: "mousefreeze", user: "alice" }],
+    },
+    {
+      type: "redemption",
+      args: [
+        "alice",
+        "Q Ability",
+        null,
+        { source: "test-command", event: "points", user: "alice" },
+      ],
+    },
   ]);
 });
 
@@ -108,8 +130,14 @@ test("bits command reuses configured bit actions in dry run", () => {
   harness.emitMessage("BITS 42");
 
   assert.deepEqual(harness.actions, [
-    { type: "blockMouse", args: [5000] },
-    { type: "pressKey", args: ["Q", "Q Ability"] },
+    {
+      type: "blockMouse",
+      args: [5000, { source: "test-command", event: "42 bits", user: "alice" }],
+    },
+    {
+      type: "pressKey",
+      args: ["Q", "Q Ability", { source: "test-command", event: "42 bits", user: "alice" }],
+    },
   ]);
 });
 

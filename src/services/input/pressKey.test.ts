@@ -54,3 +54,36 @@ test("dry run logs the key action without sending it", async () => {
 
   assert.deepEqual(sentKeys, []);
 });
+
+test("key action and cooldown logs include action context", async () => {
+  let currentTime = 10_000;
+  const logs: string[] = [];
+  const originalLog = console.log;
+  const pressKey = createPressKey({
+    now: () => currentTime,
+    cooldownMs: () => 1000,
+    dryRun: () => true,
+  });
+  console.log = (message) => logs.push(String(message));
+
+  try {
+    await pressKey("Q", "Q skill", {
+      source: "bits",
+      event: "42 bits",
+      user: "alice",
+    });
+    currentTime += 1;
+    await pressKey("Q", "Q skill", {
+      source: "bits",
+      event: "42 bits",
+      user: "alice",
+    });
+  } finally {
+    console.log = originalLog;
+  }
+
+  assert.deepEqual(logs, [
+    '[DRY RUN] Q skill — would press Q [source=bits event="42 bits" user="alice"]',
+    '[COOLDOWN] Action blocked (1s between actions) [source=bits event="42 bits" user="alice"]',
+  ]);
+});

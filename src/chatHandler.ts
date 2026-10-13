@@ -24,7 +24,8 @@ export function setupChatHandlers(client: tmi.Client): void {
     pressKey,
     blockMouse,
     simulateBits: (bits, user) => handleBitsAmount(bits, user, bitsActions, true),
-    handleChannelPointRedemption,
+    handleChannelPointRedemption: (user, rewardTitle, rewardId, context) =>
+      handleChannelPointRedemption(user, rewardTitle, rewardId, {}, context),
   });
 
   client.on("roomstate", (_channel, tags) => {

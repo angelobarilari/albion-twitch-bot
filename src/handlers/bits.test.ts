@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type tmi from "tmi.js";
+import type { ActionContext } from "../types/actions.js";
 import { setupBitsHandler } from "./bits.js";
 
 type RawMessage = { raw?: string };
 type ActionCall =
-  { type: "pressKey"; args: [string, string | undefined] } | { type: "blockMouse"; args: [number] };
+  | { type: "pressKey"; args: [string, string | undefined, ActionContext | undefined] }
+  | { type: "blockMouse"; args: [number, ActionContext | undefined] };
 
 /**
  * Creates a fake Twitch client and captures the actions requested by the bits handler.
@@ -28,8 +30,10 @@ function createHarness(settings: {
 
   setupBitsHandler(client as unknown as tmi.Client, {
     settings,
-    pressKey: (key, description) => actions.push({ type: "pressKey", args: [key, description] }),
-    blockMouse: (durationMs) => actions.push({ type: "blockMouse", args: [durationMs] }),
+    pressKey: (key, description, context) =>
+      actions.push({ type: "pressKey", args: [key, description, context] }),
+    blockMouse: (durationMs, context) =>
+      actions.push({ type: "blockMouse", args: [durationMs, context] }),
   });
 
   return {
@@ -56,8 +60,14 @@ test("bits event triggers configured freeze and key actions", () => {
   harness.emit("@badges=;bits=1;display-name=Viewer; :tmi.twitch.tv PRIVMSG #channel :hello");
 
   assert.deepEqual(harness.actions, [
-    { type: "blockMouse", args: [5000] },
-    { type: "pressKey", args: ["A", "Dismount"] },
+    {
+      type: "blockMouse",
+      args: [5000, { source: "bits", event: "1 bits", user: "Viewer" }],
+    },
+    {
+      type: "pressKey",
+      args: ["A", "Dismount", { source: "bits", event: "1 bits", user: "Viewer" }],
+    },
   ]);
 });
 
