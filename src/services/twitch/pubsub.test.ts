@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import test from "node:test";
 import WebSocket from "ws";
+import type { ActionContext } from "../../types/actions.js";
 import type { Settings } from "../../types/settings.js";
 import { connectPubSub } from "./pubsub.js";
 
@@ -26,7 +27,7 @@ const channelPointsActions: Settings["channelPointsActions"] = [
 
 function createHarness() {
   const socket = new MockWebSocket();
-  const keyActions: Array<[string, string | undefined]> = [];
+  const keyActions: Array<[string, string | undefined, ActionContext | undefined]> = [];
   const intervals: Array<{ callback: () => void; delay: number }> = [];
   const clearedIntervals: unknown[] = [];
   const timeouts: Array<{ callback: () => void; delay: number }> = [];
@@ -34,8 +35,8 @@ function createHarness() {
   connectPubSub("channel-123", "test-token", {
     createWebSocket: () => socket as unknown as WebSocket,
     settings: { channelPointsActions },
-    pressKey: (key, description) => {
-      keyActions.push([key, description]);
+    pressKey: (key, description, context) => {
+      keyActions.push([key, description, context]);
       return Promise.resolve();
     },
     timers: {
@@ -95,8 +96,8 @@ test("PubSub matches redemptions by ID or case-insensitive title", () => {
   emitRedemption(harness.socket, { title: "w ability" });
 
   assert.deepEqual(harness.keyActions, [
-    ["Q", "Q skill"],
-    ["W", "W skill"],
+    ["Q", "Q skill", { source: "channel-points", event: "Renamed reward", user: "Viewer" }],
+    ["W", "W skill", { source: "channel-points", event: "w ability", user: "Viewer" }],
   ]);
 });
 

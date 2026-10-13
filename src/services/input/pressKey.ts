@@ -1,5 +1,7 @@
 import { Hardware } from "keysender";
 import type { KeyboardButton } from "keysender";
+import type { ActionContext } from "../../types/actions.js";
+import { formatActionContext } from "../../utils/actionContext.js";
 import settingsModule = require("../../settings.js");
 
 const { settings } = settingsModule;
@@ -30,28 +32,37 @@ export function createPressKey(adapters: PressKeyAdapters = {}) {
       await sender.keyboard.sendKey(key.toLowerCase() as KeyboardButton);
     });
 
-  return async function pressKey(key: string, description?: string): Promise<void> {
+  return async function pressKey(
+    key: string,
+    description?: string,
+    context?: ActionContext,
+  ): Promise<void> {
     const currentTime = now();
     const cooldownDurationMs = cooldownMs();
+    const contextLabel = formatActionContext(context);
 
     if (currentTime - lastActionTime < cooldownDurationMs) {
-      console.log(`[COOLDOWN] Action blocked (${cooldownDurationMs / 1000}s between actions)`);
+      console.log(
+        `[COOLDOWN] Action blocked (${cooldownDurationMs / 1000}s between actions)${contextLabel}`,
+      );
       return;
     }
 
     lastActionTime = currentTime;
     if (dryRun()) {
-      console.log(`[DRY RUN] ${description ?? "Key action"} — would press ${key.toUpperCase()}`);
+      console.log(
+        `[DRY RUN] ${description ?? "Key action"} — would press ${key.toUpperCase()}${contextLabel}`,
+      );
       return;
     }
 
-    console.log(`[ACTION] ${description} — pressing ${key.toUpperCase()}`);
+    console.log(`[ACTION] ${description} — pressing ${key.toUpperCase()}${contextLabel}`);
 
     try {
       await sendKey(key.toLowerCase());
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(`[ERROR] Failed to press ${key.toUpperCase()}:`, message);
+      console.error(`[ERROR] Failed to press ${key.toUpperCase()}${contextLabel}:`, message);
       console.error(`Check that the "${GAME_WINDOW}" window is open.`);
     }
   };

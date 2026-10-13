@@ -19,3 +19,9 @@ export type TestCommand = {
 export type MouseFreezeAction = {
   bits: number;
 };
+
+export type ActionContext = {
+  source: "bits" | "channel-points" | "test-command";
+  event: string;
+  user: string;
+};

@@ -1,5 +1,6 @@
 import type tmi from "tmi.js";
 import type { MessageHandlerActions } from "../types/handlers.js";
+import { formatActionContext } from "../utils/actionContext.js";
 
 /**
  * Registers the chat listener for configured test commands.
@@ -25,16 +26,20 @@ export function setupMessageHandler(client: tmi.Client, actions: MessageHandlerA
     const freezeCommand = settings.testMouseFreezeCommand.toLowerCase();
 
     if (normalized === freezeCommand) {
-      console.log("[TEST] Simulating mouse freeze");
-      blockMouse(settings.mouseFreezeDurationMs ?? 5000);
+      const context = { source: "test-command" as const, event: freezeCommand, user };
+      console.log(`[TEST] Simulating mouse freeze${formatActionContext(context)}`);
+      blockMouse(settings.mouseFreezeDurationMs ?? 5000, context);
       return;
     }
 
     if (normalized.startsWith("points ")) {
       const rewardTitle = message.trim().slice(7).trim();
       if (rewardTitle) {
-        console.log(`[TEST] Simulating channel point redemption: "${rewardTitle}"`);
-        handleChannelPointRedemption(user, rewardTitle, null);
+        const context = { source: "test-command" as const, event: "points", user };
+        console.log(
+          `[TEST] Simulating channel point redemption: ${JSON.stringify(rewardTitle)}${formatActionContext(context)}`,
+        );
+        handleChannelPointRedemption(user, rewardTitle, null, context);
       }
       return;
     }
@@ -55,6 +60,9 @@ export function setupMessageHandler(client: tmi.Client, actions: MessageHandlerA
     const match = (settings.testCommands ?? []).find(
       (command) => command.command.toLowerCase() === normalized,
     );
-    if (match) pressKey(match.key, `Command "${match.command}" from ${user} → ${match.key}`);
+    if (match) {
+      const context = { source: "test-command" as const, event: match.command, user };
+      pressKey(match.key, `Command "${match.command}" from ${user} → ${match.key}`, context);
+    }
   });
 }
