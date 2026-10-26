@@ -1,5 +1,6 @@
 import type tmi from "tmi.js";
 import type { BitsHandlerActions } from "../types/handlers.js";
+import { formatActionContext } from "../utils/actionContext.js";
 
 /**
  * Registers the Twitch IRC listener that maps cheer amounts to game actions.
@@ -42,16 +43,32 @@ export function handleBitsAmount(
   if (!Number.isSafeInteger(bits) || bits <= 0) return;
 
   const { settings, pressKey, blockMouse } = actions;
+  const context = {
+    source: simulated ? ("test-command" as const) : ("bits" as const),
+    event: `${bits} bits`,
+    user,
+  };
   console.log(
     simulated
-      ? `\n[TEST] Simulating ${bits} bits from ${user}.`
-      : `\n[BITS] ${user} sent ${bits} bits.`,
+      ? `\n[TEST] Simulating ${bits} bits${formatActionContext(context)}`
+      : `\n[BITS]${formatActionContext(context)}`,
   );
 
   const freezeAction = settings.mouseFreezeActions.find((action) => bits === action.bits);
-  if (freezeAction) blockMouse(settings.mouseFreezeDurationMs);
+  if (freezeAction) {
+    console.log(
+      `[MAPPING] ${bits} bits -> mouse freeze ${settings.mouseFreezeDurationMs}ms${formatActionContext(context)}`,
+    );
+    blockMouse(settings.mouseFreezeDurationMs, context);
+  }
 
   const action = settings.bitsActions.find((item) => bits === item.bits);
-  if (action) pressKey(action.key, action.description);
-  else console.log(`[INFO] ${bits} bits — no action configured for this amount`);
+  if (action) {
+    console.log(
+      `[MAPPING] ${bits} bits -> key ${action.key} (${action.description ?? "no description"})${formatActionContext(context)}`,
+    );
+    pressKey(action.key, action.description, context);
+  } else if (!freezeAction) {
+    console.log(`[UNMAPPED] ${bits} bits has no configured action${formatActionContext(context)}`);
+  }
 }

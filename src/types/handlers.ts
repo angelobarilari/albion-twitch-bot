@@ -1,8 +1,9 @@
 import type { Settings } from "./settings.js";
+import type { ActionContext } from "./actions.js";
 
 type InputActions = {
-  pressKey: (key: string, description?: string) => unknown;
-  blockMouse: (durationMs: number) => void;
+  pressKey: (key: string, description?: string, context?: ActionContext) => unknown;
+  blockMouse: (durationMs: number, context?: ActionContext) => void;
 };
 
 export type BitsHandlerActions = InputActions & {
@@ -16,5 +17,6 @@ export type MessageHandlerActions = InputActions & {
     user: string,
     rewardTitle: string,
     rewardId: string | null,
+    context?: ActionContext,
   ) => void;
 };

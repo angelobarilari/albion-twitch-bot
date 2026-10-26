@@ -70,6 +70,7 @@ Test commands are disabled by default. When enabled, only moderators and the bro
 - `index.ts`: process startup and Twitch client connection.
 - `config.ts`: Twitch credentials read from environment variables.
 - `src/types/actions.ts`: action configuration contracts.
+- `src/types/config.ts`: Twitch credential and environment contracts.
 - `src/types/settings.ts`: application settings contract.
 - `src/types/handlers.ts`: dependency contracts for event handlers.
 - `src/settings.ts`: configuration loading and merging.
@@ -94,6 +95,10 @@ npm test
 The suite covers configuration, settings validation, PubSub, key presses, mouse blocking, chat connection handlers, bit events, and chat commands. Tests use injected fakes for environment variables, the settings file system, Twitch clients, WebSockets, timers, key sending, and Windows input blocking. They do not connect to Twitch, call Windows APIs, send real keyboard or mouse input, or require Albion to be running. GitHub Actions runs this suite on Windows.
 
 These are isolated tests, not end-to-end checks of Twitch connectivity, `tmi.js` reconnection behavior, or interaction with Albion and Windows input APIs.
+
+## Event Logs
+
+Action logs include the event source, event, user, configured mapping, and whether the action was executed, simulated, or blocked by a cooldown. Chat message contents and credentials are not logged.
 
 ## Known Limitations and Risks
 

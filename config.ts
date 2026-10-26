@@ -1,15 +1,4 @@
-type BotConfig = {
-  username: string;
-  token: string;
-  broadcasterToken: string;
-};
-
-type ConfigEnvironment = {
-  [key: string]: string | undefined;
-  TWITCH_BOT_USERNAME?: string;
-  TWITCH_BOT_TOKEN?: string;
-  TWITCH_BROADCASTER_TOKEN?: string;
-};
+import type { BotConfig, ConfigEnvironment } from "./src/types/config.js";
 
 function createConfig(environment: ConfigEnvironment): BotConfig {
   return {

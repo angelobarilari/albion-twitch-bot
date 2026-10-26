@@ -114,3 +114,29 @@ test("dry run does not block input or schedule an unblock", () => {
   assert.equal(nativeCalls, 0);
   assert.equal(scheduledCount, 0);
 });
+
+test("input freeze and cooldown logs include action context", () => {
+  let currentTime = 0;
+  const logs: string[] = [];
+  const originalLog = console.log;
+  const blockMouse = createBlockMouse({
+    blockInput: () => true,
+    dryRun: () => true,
+    now: () => currentTime,
+    cooldownMs: () => 1000,
+  });
+  console.log = (message) => logs.push(String(message));
+
+  try {
+    blockMouse(5000, { source: "bits", event: "100 bits", user: "alice" });
+    currentTime += 1;
+    blockMouse(5000, { source: "bits", event: "100 bits", user: "alice" });
+  } finally {
+    console.log = originalLog;
+  }
+
+  assert.deepEqual(logs, [
+    '[DRY RUN] Would block input for 5s [source=bits event="100 bits" user="alice"]',
+    '[COOLDOWN] Input freeze request ignored. [source=bits event="100 bits" user="alice"]',
+  ]);
+});

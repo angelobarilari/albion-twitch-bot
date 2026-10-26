@@ -1,4 +1,6 @@
 import koffi = require("koffi");
+import type { ActionContext } from "../../types/actions.js";
+import { formatActionContext } from "../../utils/actionContext.js";
 import settingsModule = require("../../settings.js");
 
 const { settings } = settingsModule;
@@ -29,33 +31,36 @@ export function createBlockMouse(adapters: BlockMouseAdapters) {
   let blockGeneration = 0;
   let lastBlockTime = Number.NEGATIVE_INFINITY;
 
-  return function blockMouse(durationMs: number): void {
+  return function blockMouse(durationMs: number, context?: ActionContext): void {
     const currentTime = now();
+    const contextLabel = formatActionContext(context);
     if (currentTime - lastBlockTime < cooldownMs()) {
-      console.log("[COOLDOWN] Input freeze request ignored.");
+      console.log(`[COOLDOWN] Input freeze request ignored.${contextLabel}`);
       return;
     }
 
     if (dryRun()) {
       lastBlockTime = currentTime;
-      console.log(`[DRY RUN] Would block input for ${durationMs / 1000}s`);
+      console.log(`[DRY RUN] Would block input for ${durationMs / 1000}s${contextLabel}`);
       return;
     }
 
     const succeeded = adapters.blockInput(true);
     if (!succeeded) {
-      console.log("[FREEZE] BlockInput failed — try running the bot as administrator");
+      console.log(
+        `[FREEZE] BlockInput failed — try running the bot as administrator${contextLabel}`,
+      );
       return;
     }
     lastBlockTime = currentTime;
     if (unblockTimer !== undefined) cancelTimeout(unblockTimer);
     const currentGeneration = ++blockGeneration;
-    console.log(`[FREEZE] Input blocked for ${durationMs / 1000}s`);
+    console.log(`[FREEZE] Input blocked for ${durationMs / 1000}s${contextLabel}`);
     unblockTimer = scheduleTimeout(() => {
       if (currentGeneration !== blockGeneration) return;
       unblockTimer = undefined;
       adapters.blockInput(false);
-      console.log("[FREEZE] Input unblocked");
+      console.log(`[FREEZE] Input unblocked${contextLabel}`);
     }, durationMs);
   };
 }
