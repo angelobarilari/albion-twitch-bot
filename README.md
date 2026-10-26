@@ -70,6 +70,7 @@ Test commands are disabled by default. When enabled, only moderators and the bro
 - `index.ts`: process startup and Twitch client connection.
 - `config.ts`: Twitch credentials read from environment variables.
 - `src/types/actions.ts`: action configuration contracts.
+- `src/types/config.ts`: Twitch credential and environment contracts.
 - `src/types/settings.ts`: application settings contract.
 - `src/types/handlers.ts`: dependency contracts for event handlers.
 - `src/settings.ts`: configuration loading and merging.
