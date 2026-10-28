@@ -26,10 +26,11 @@ Set the bot credentials in the terminal environment. Never store the token in so
 ```powershell
 $env:TWITCH_BOT_USERNAME = "your_bot_username"
 $env:TWITCH_BOT_TOKEN = "oauth:your_token"
+$env:TWITCH_CLIENT_ID = "your_twitch_application_client_id"
 $env:TWITCH_BROADCASTER_TOKEN = "your_broadcaster_token"
 ```
 
-Edit `settings.json` and set `channel`. `TWITCH_BROADCASTER_TOKEN` is optional and is only needed for channel point redemptions; give it only the `channel:read:redemptions` scope. Tokens must not be stored in `settings.json`.
+Edit `settings.json` and set `channel`. `TWITCH_CLIENT_ID` and `TWITCH_BROADCASTER_TOKEN` are only needed for channel point redemptions. The broadcaster user access token must have the `channel:read:redemptions` scope and belong to the Twitch application identified by `TWITCH_CLIENT_ID`. Keep both credentials in environment variables; never store tokens in `settings.json`.
 
 Compile the application before starting it:
 
@@ -78,7 +79,7 @@ Test commands are disabled by default. When enabled, only moderators and the bro
 - `src/handlers/bits.ts`: bit event handling.
 - `src/handlers/messages.ts`: chat test commands.
 - `src/chatHandler.ts`: handler composition and connection events.
-- `src/services/twitch/pubsub.ts`: PubSub connection and channel point redemptions.
+- `src/services/twitch/eventsub.ts`: EventSub WebSocket connection and channel point redemptions.
 - `src/services/input/blockMouse.ts`: Windows input blocking.
 - `src/services/input/pressKey.ts`: key presses and cooldown handling.
 
@@ -92,9 +93,9 @@ Run the automated tests with:
 npm test
 ```
 
-The suite covers configuration, settings validation, PubSub, key presses, mouse blocking, chat connection handlers, bit events, and chat commands. Tests use injected fakes for environment variables, the settings file system, Twitch clients, WebSockets, timers, key sending, and Windows input blocking. They do not connect to Twitch, call Windows APIs, send real keyboard or mouse input, or require Albion to be running. GitHub Actions runs this suite on Windows.
+The suite covers configuration, settings validation, EventSub, key presses, mouse blocking, chat connection handlers, bit events, and chat commands. Tests use injected fakes for environment variables, the settings file system, Twitch clients, WebSockets, timers, HTTP requests, key sending, and Windows input blocking. They do not connect to Twitch, call Windows APIs, send real keyboard or mouse input, or require Albion to be running. GitHub Actions runs this suite on Windows.
 
-These are isolated tests, not end-to-end checks of Twitch connectivity, `tmi.js` reconnection behavior, or interaction with Albion and Windows input APIs.
+These are isolated tests, not end-to-end checks of Twitch connectivity, EventSub subscription authorization, `tmi.js` reconnection behavior, or interaction with Albion and Windows input APIs.
 
 ## Event Logs
 
@@ -102,7 +103,7 @@ Action logs include the event source, event, user, configured mapping, and wheth
 
 ## Known Limitations and Risks
 
-- IRC reconnection is handled by `tmi.js`; the bot does not schedule a second manual reconnect. Live reconnect behavior still requires validation with Twitch.
+- IRC reconnection is handled by `tmi.js`; the bot does not schedule a second manual reconnect. EventSub uses Twitch's WebSocket session and Helix subscription APIs, and its live reconnect and authorization behavior still require validation with Twitch.
 - Test commands are disabled by default and require a moderator or broadcaster role when enabled.
 - Mouse-freeze requests have their own cooldown; an accepted later request extends the block, and stale timers cannot release it early.
 - `settings.json` values are validated at load time. Invalid files fall back to defaults, and overlapping bit mappings keep the key action while disabling the conflicting freeze.

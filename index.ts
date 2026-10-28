@@ -19,9 +19,12 @@ if (!config.username || !config.token) {
   process.exit(1);
 }
 
-if (settings.channelPointsActions.length > 0 && !config.broadcasterToken) {
+if (
+  settings.channelPointsActions.length > 0 &&
+  (!config.clientId.trim() || !config.broadcasterToken.trim())
+) {
   console.warn(
-    "[WARNING] Channel point actions are configured, but TWITCH_BROADCASTER_TOKEN is missing.",
+    "[WARNING] Channel point actions are configured, but TWITCH_CLIENT_ID or TWITCH_BROADCASTER_TOKEN is missing.",
   );
 }
 
