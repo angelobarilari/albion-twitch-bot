@@ -1,5 +1,5 @@
 import type tmi from "tmi.js";
-import { connectPubSub, handleChannelPointRedemption } from "./services/twitch/pubsub.js";
+import { connectEventSub, handleChannelPointRedemption } from "./services/twitch/eventsub.js";
 import { blockMouse, pressKey } from "./services/input/index.js";
 import { handleBitsAmount, setupBitsHandler } from "./handlers/bits.js";
 import { setupMessageHandler } from "./handlers/messages.js";
@@ -15,7 +15,7 @@ const { settings } = settingsModule;
  * @returns Nothing.
  */
 export function setupChatHandlers(client: tmi.Client): void {
-  let pubSubConnected = false;
+  let eventSubStarted = false;
 
   const bitsActions = { settings, pressKey, blockMouse };
   setupBitsHandler(client, bitsActions);
@@ -29,19 +29,20 @@ export function setupChatHandlers(client: tmi.Client): void {
   });
 
   client.on("roomstate", (_channel, tags) => {
-    if (pubSubConnected) return;
+    if (eventSubStarted || settings.channelPointsActions.length === 0) return;
     const channelId = tags["room-id"];
     if (!channelId) return;
 
     const token = config.broadcasterToken.trim().replace(/^oauth:/, "");
-    if (!token) {
-      console.log("[PUBSUB] broadcasterToken is not configured — channel points are disabled.");
-      console.log("[PUBSUB] Ask the streamer to fill in broadcasterToken in settings.json.");
+    if (!config.clientId.trim() || !token) {
+      console.log(
+        "[EVENTSUB] Channel points are disabled. Set TWITCH_CLIENT_ID and TWITCH_BROADCASTER_TOKEN.",
+      );
       return;
     }
 
-    pubSubConnected = true;
-    connectPubSub(channelId, token);
+    eventSubStarted = true;
+    connectEventSub(channelId, config.clientId.trim(), token);
   });
 
   client.on("connected", (_address, port) => {
@@ -65,9 +66,14 @@ export function setupChatHandlers(client: tmi.Client): void {
       console.log("  None configured.");
     }
 
-    const token = config.broadcasterToken.trim();
-    if (!token)
-      console.log("  [WARNING] broadcasterToken is empty — channel points will not work.");
+    if (settings.channelPointsActions.length > 0) {
+      if (!config.clientId.trim())
+        console.log("  [WARNING] TWITCH_CLIENT_ID is empty — channel points will not work.");
+      if (!config.broadcasterToken.trim())
+        console.log(
+          "  [WARNING] TWITCH_BROADCASTER_TOKEN is empty — channel points will not work.",
+        );
+    }
 
     console.log("");
     if (settings.testCommandsEnabled) {

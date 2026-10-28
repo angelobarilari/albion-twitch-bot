@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx index.ts",
     "start": "node dist/app/index.js",
-    "test": "tsx --test config.test.ts src/settings.test.ts src/chatHandler.test.ts src/handlers/bits.test.ts src/handlers/messages.test.ts src/services/twitch/pubsub.test.ts src/services/input/pressKey.test.ts src/services/input/blockMouse.test.ts",
+    "test": "tsx --test config.test.ts src/settings.test.ts src/chatHandler.test.ts src/handlers/bits.test.ts src/handlers/messages.test.ts src/services/twitch/eventsub.test.ts src/services/input/pressKey.test.ts src/services/input/blockMouse.test.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc && pkg dist/app/index.js --target node18-win-x64 --output dist/albion-bot.exe && copy node_modules\\keysender\\build\\Release\\key_sender.node dist\\key_sender.node && copy settings.json dist\\settings.json",
     "format": "prettier --write .",

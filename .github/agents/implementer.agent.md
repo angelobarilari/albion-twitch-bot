@@ -1,6 +1,6 @@
 ---
 name: Albion Bot Implementer
-description: "Use to implement features, fix bugs, and refactor the Albion Twitch bot using TypeScript, tmi.js, PubSub, settings.json, and Windows input adapters."
+description: "Use to implement features, fix bugs, and refactor the Albion Twitch bot using TypeScript, tmi.js, EventSub, settings.json, and Windows input adapters."
 tools: [read, edit, search, execute, todo]
 user-invocable: true
 argument-hint: "Describe the feature or bug to implement."
